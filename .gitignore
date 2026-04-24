@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# env
+.env
+backend/.env
+frontend/.env
+
+# puppeteer/chrome session
+user-data/
+backend/user-data/
+puppeteer-data/
+backend/puppeteer-data/
+
+# logs
+*.log
+
+# OS/editor
+.DS_Store
+.vscode/

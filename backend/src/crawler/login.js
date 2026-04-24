@@ -1,14 +1,24 @@
 const puppeteer = require("puppeteer-core");
 
+function getRequiredEnv(name) {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`${name} chua duoc cau hinh trong .env`);
+  }
+
+  return value;
+}
+
 async function loginX() {
   let browser;
 
   try {
     browser = await puppeteer.launch({
-      executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      executablePath: getRequiredEnv("CHROME_EXECUTABLE_PATH"),
       headless: false,
       defaultViewport: null,
-      userDataDir: "C:\\Users\\Adminn\\puppeteer-data",
+      userDataDir: getRequiredEnv("PUPPETEER_USER_DATA_DIR"),
       args: ["--disable-blink-features=AutomationControlled"],
     });
 
@@ -40,6 +50,7 @@ async function loginX() {
     await new Promise((resolve) => setTimeout(resolve, 5000));
   } catch (error) {
     console.error("Login X loi:", error.message);
+    throw error;
   } finally {
     if (browser) {
       await browser.close();

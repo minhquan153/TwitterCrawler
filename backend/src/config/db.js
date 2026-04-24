@@ -9,7 +9,7 @@ async function connectDB() {
     console.log("Da ket noi MongoDB");
   } catch (error) {
     console.error("Loi ket noi MongoDB:", error.message);
-    process.exit(1);
+    throw error; 
   }
 }
 

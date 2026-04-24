@@ -1,15 +1,24 @@
 const puppeteer = require("puppeteer-core");
 
+function getRequiredEnv(name) {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`${name} chua duoc cau hinh trong .env`);
+  }
+
+  return value;
+}
+
 async function crawlTweets() {
   let browser;
 
   try {
     browser = await puppeteer.launch({
-      executablePath:
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      executablePath: getRequiredEnv("CHROME_EXECUTABLE_PATH"),
       headless: false,
       defaultViewport: null,
-      userDataDir: "C:\\Users\\Adminn\\puppeteer-data",
+      userDataDir: getRequiredEnv("PUPPETEER_USER_DATA_DIR"),
       args: ["--disable-blink-features=AutomationControlled"],
     });
 
@@ -28,12 +37,6 @@ async function crawlTweets() {
 
     console.log("Da load tweet");
 
-    await page.waitForSelector("article", {
-      timeout: 30000,
-    });
-
-    console.log("Da load tweet");
-
     for (let i = 0; i < 5; i++) {
       console.log("Scroll lan:", i + 1);
 
@@ -44,7 +47,6 @@ async function crawlTweets() {
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
 
-    // 👇 extract
     const tweets = await page.$$eval("article", (items) => {
       return items
         .map((item) => {
@@ -70,12 +72,13 @@ async function crawlTweets() {
                 (part) =>
                   part.includes("h") ||
                   part.includes("m") ||
-                  part.includes("s"),
+                  part.includes("s")
               ) || null;
           }
 
           if (timeLinkEl) {
             const href = timeLinkEl.getAttribute("href");
+
             tweetUrl = href ? `https://x.com${href}` : null;
 
             const match = href ? href.match(/status\/(\d+)/) : null;
@@ -96,13 +99,14 @@ async function crawlTweets() {
 
     console.log("Extract xong:", tweets.length);
 
-    await browser.close();
-
     return tweets;
   } catch (error) {
     console.error("Crawl loi:", error.message);
-    if (browser) await browser.close();
-    return [];
+    throw error;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 

@@ -1,5 +1,4 @@
-const dns = require("node:dns");
-dns.setServers(["1.1.1.1", "8.8.8.8"]);
+require("dotenv").config();
 
 const connectDB = require("../src/config/db");
 const crawlTweets = require("../src/crawler/crawl");

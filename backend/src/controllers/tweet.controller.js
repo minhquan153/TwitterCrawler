@@ -1,10 +1,14 @@
+const mongoose = require("mongoose");
+
 const crawlTweetsFromX = require("../crawler/crawl");
+
 const {
   saveTweets,
   getTweets,
   deleteTweet,
   exportTweets,
   importTweets,
+  isValidTweetInput,
 } = require("../services/tweet.service");
 
 const crawlTweets = async (req, res) => {
@@ -40,7 +44,15 @@ const listTweets = async (req, res) => {
 
 const removeTweet = async (req, res) => {
   try {
-    const tweet = await deleteTweet(req.params.id);
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "ID khong hop le",
+      });
+    }
+
+    const tweet = await deleteTweet(id);
 
     if (!tweet) {
       return res.status(404).json({
@@ -83,6 +95,14 @@ const importTweetData = async (req, res) => {
     if (!Array.isArray(tweets)) {
       return res.status(400).json({
         message: "tweets phai la array",
+      });
+    }
+
+    const invalidTweet = tweets.find((tweet) => !isValidTweetInput(tweet));
+
+    if (invalidTweet) {
+      return res.status(400).json({
+        message: "Moi tweet can co tweetId va content hop le",
       });
     }
 
